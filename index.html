@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="NDX to NQ Converter - MenthorQ Gamma Levels Converter for Futures Trading">
+    <meta name="keywords" content="NDX, NQ, futures, trading, MenthorQ, gamma levels, converter">
+    <title>NDX → NQ Converter | MenthorQ Levels</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #4caf50;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --dark: #263238;
+            --light: #f8f9fa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        .section {
+            background: var(--light);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        input, textarea {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .coefficient-display {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .level-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .level-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .level-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .level-values {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .level-input-value {
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .level-output-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--success);
+        }
+        
+        .arrow {
+            color: var(--primary);
+            font-size: 1.5em;
+        }
+        
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+        
+        .output-box {
+            background: var(--dark);
+            color: #4caf50;
+            padding: 25px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-size: 0.9em;
+            max-height: 500px;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInDown 0.4s ease-out;
+        }
+        
+        .alert-info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+        }
+        
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            padding: 20px;
+            opacity: 0.8;
+        }
+        
+        .footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .main-card {
+                padding: 20px;
+            }
+            
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .levels-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        .history-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .history-time {
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> NDX → NQ Converter</h1>
+            <p>MenthorQ Gamma Levels Converter for Futures Trading</p>
+        </div>
+        
+        <div class="main-card">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('converter')">
+                    <i class="fas fa-calculator"></i> Конвертер
+                </button>
+                <button class="tab" onclick="switchTab('history')">
+                    <i class="fas fa-history"></i> История
+                </button>
+                <button class="tab" onclick="switchTab('about')">
+                    <i class="fas fa-info-circle"></i> О приложении
+                </button>
+            </div>
+            
+            <!-- TAB 1: Converter -->
+            <div id="converter" class="tab-content active">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Введи текущие цены NDX и NQ для расчета коэффициента, затем введи NDX уровни для автоматической конвертации</span>
+                </div>
+                
+                <!-- Section 1: Coefficient -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-calculator"></i>
+                        Шаг 1: Рассчитай коэффициент
+                    </h2>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>
+                                <i class="fas fa-chart-bar"></i> NDX Цена
+                            </label>
+                            <input type="number" id="ndx-price" placeholder="25205.63" step="0.01" value="25205.63">
+                        </div>
+                        <div class="input-group">
+                            <label>
+                                <i class="fas fa-chart-line"></i> NQ Цена
+                            </label>
+                            <input type="number" id="nq-price" placeholder="25444" step="0.25" value="25444">
+                        </div>
+                        <div class="input-group" style="display: flex; align-items: flex-end;">
+                            <button onclick="calculateCoefficient()">
+                                <i class="fas fa-sync-alt"></i> Рассчитать
+                            </button>
+                        </div>
+                    </div>
+                    <div class="coefficient-display" id="coefficient-display">
+                        <i class="fas fa-percentage"></i> Коэффициент: 1.01
+                    </div>
+                </div>
+                
+                <!-- Section 2: Main Levels -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-layer-group"></i>
+                        Шаг 2: Основные уровни
+                    </h2>
+                    <div class="levels-grid">
+                        <div class="level-card">
+                            <div class="level-header">
+                                <i class="fas fa-circle" style="color: #ffc107;"></i>
+                                HVL (High Vol Level)
+                            </div>
+                            <input type="number" id="hvl-ndx" placeholder="NDX: 25140" step="1" value="25140">
+                            <div class="level-values">
+                                <span class="level-output-value" id="hvl-nq">—</span>
+                            </div>
+                        </div>
+                        
+                        <div class="level-card">
+                            <div class="level-header">
+                                <i class="fas fa-circle" style="color: #f44336;"></i>
+                                Call Resistance
+                            </div>
+                            <input type="number" id="call-res-ndx" placeholder="NDX: 25250" step="1" value="25250">
+                            <div class="level-values">
+                                <span class="level-output-value" id="call-res-nq">—</span>
+                            </div>
+                        </div>
+                        
+                        <div class="level-card">
+                            <div class="level-header">
+                                <i class="fas fa-circle" style="color: #4caf50;"></i>
+                                Put Support
+                            </div>
+                            <input type="number" id="put-sup-ndx" placeholder="NDX: 24000" step="1" value="24000">
+                            <div class="level-values">
+                                <span class="level-output-value" id="put-sup-nq">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section 3: GEX Levels -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-bullseye"></i>
+                        Шаг 3: GEX Магниты (опционально)
+                    </h2>
+                    <textarea id="gex-levels-ndx" rows="6" placeholder="Вставь NDX GEX уровни (по одному на строку):
+25180
+25200
+25270
+25280
+
+Или оставь пустым для пропуска" style="width: 100%; resize: vertical;"></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button onclick="convertAll()">
+                        <i class="fas fa-magic"></i> КОНВЕРТИРОВАТЬ ВСЕ
+                    </button>
+                    <button class="btn-warning" onclick="resetForm()">
+                        <i class="fas fa-redo"></i> Сбросить
+                    </button>
+                </div>
+                
+                <div class="output-box" id="output-box" style="display: none;"></div>
+                
+                <div class="button-group" id="action-buttons" style="display: none;">
+                    <button class="btn-success" onclick="copyToClipboard()">
+                        <i class="fas fa-copy"></i> Копировать
+                    </button>
+                    <button class="btn-success" onclick="saveToHistory()">
+                        <i class="fas fa-save"></i> Сохранить в историю
+                    </button>
+                    <button class="btn-warning" onclick="downloadTxt()">
+                        <i class="fas fa-download"></i> Скачать TXT
+                    </button>
+                </div>
+                
+                <div class="alert alert-success" id="success-alert" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="success-message"></span>
+                </div>
+            </div>
+            
+            <!-- TAB 2: History -->
+            <div id="history" class="tab-content">
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-history"></i>
+                        История конвертаций
+                    </h2>
+                    <div id="history-list">
+                        <p style="text-align: center; color: #666; padding: 40px;">
+                            <i class="fas fa-inbox" style="font-size: 3em; display: block; margin-bottom: 10px; opacity: 0.3;"></i>
+                            История пуста. Сохрани свою первую конвертацию!
+                        </p>
+                    </div>
+                    <div class="button-group" style="margin-top: 20px;">
+                        <button class="btn-warning" onclick="clearHistory()">
+                            <i class="fas fa-trash"></i> Очистить историю
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TAB 3: About -->
+            <div id="about" class="tab-content">
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        О приложении
+                    </h2>
+                    <p style="line-height: 1.8; color: #666;">
+                        <strong>NDX → NQ Converter</strong> — это бесплатный инструмент для конвертации гамма-уровней MenthorQ из NDX (Nasdaq-100 Index) в NQ (Nasdaq-100 Mini Futures).
+                    </p>
+                    
+                    <h3 style="margin-top: 20px; color: var(--primary);">
+                        <i class="fas fa-question-circle"></i> Как использовать:
+                    </h3>
+                    <ol style="line-height: 2; color: #666; margin-left: 20px;">
+                        <li>Получи NDX уровни из MenthorQ Dashboard</li>
+                        <li>Введи текущие цены NDX и NQ для расчета коэффициента</li>
+                        <li>Введи NDX уровни (HVL, Call Resistance, Put Support, GEX)</li>
+                        <li>Нажми "КОНВЕРТИРОВАТЬ ВСЕ"</li>
+                        <li>Скопируй результат или сохрани в историю</li>
+                    </ol>
+                    
+                    <h3 style="margin-top: 20px; color: var(--primary);">
+                        <i class="fas fa-lightbulb"></i> Возможности:
+                    </h3>
+                    <ul style="line-height: 2; color: #666; margin-left: 20px;">
+                        <li>✅ Автоматический расчет коэффициента</li>
+                        <li>✅ Конвертация всех типов уровней</li>
+                        <li>✅ История конвертаций (сохраняется в браузере)</li>
+                        <li>✅ Экспорт в TXT файл</li>
+                        <li>✅ Копирование в буфер обмена</li>
+                        <li>✅ Адаптивный дизайн (работает на телефоне)</li>
+                    </ul>
+                    
+                    <div style="margin-top: 30px; padding: 20px; background: var(--light); border-radius: 10px;">
+                        <p style="color: #666; text-align: center;">
+                            <i class="fas fa-heart" style="color: #f44336;"></i>
+                            Создано для трейдеров фьючерсов ES/NQ
+                        </p>
+                        <p style="color: #999; text-align: center; margin-top: 10px; font-size: 0.9em;">
+                            Версия 1.0 | © 2026
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>
+                <i class="fas fa-chart-line"></i> 
+                NDX → NQ Converter | 
+                Powered by <a href="https://menthorq.com" target="_blank">MenthorQ</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        let coefficient = 1.01;
+        let currentOutput = '';
+        
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.closest('.tab').classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'history') {
+                loadHistory();
+            }
+        }
+        
+        // Calculate coefficient
+        function calculateCoefficient() {
+            const ndxPrice = parseFloat(document.getElementById('ndx-price').value);
+            const nqPrice = parseFloat(document.getElementById('nq-price').value);
+            
+            if (ndxPrice && nqPrice && ndxPrice > 0) {
+                coefficient = nqPrice / ndxPrice;
+                document.getElementById('coefficient-display').innerHTML = 
+                    `<i class="fas fa-percentage"></i> Коэффициент: ${coefficient.toFixed(5)} <span style="font-size: 0.8em; opacity: 0.8;">(NQ = NDX × ${coefficient.toFixed(2)})</span>`;
+            } else {
+                showAlert('Введи корректные цены NDX и NQ!', 'error');
+            }
+        }
+        
+        // Convert level
+        function convertLevel(ndxValue) {
+            return Math.round(ndxValue * coefficient);
+        }
+        
+        // Convert all levels
+        function convertAll() {
+            try {
+                // Get main levels
+                const hvlNdx = parseFloat(document.getElementById('hvl-ndx').value);
+                const callResNdx = parseFloat(document.getElementById('call-res-ndx').value);
+                const putSupNdx = parseFloat(document.getElementById('put-sup-ndx').value);
+                
+                // Convert main levels
+                if (hvlNdx) {
+                    document.getElementById('hvl-nq').textContent = convertLevel(hvlNdx);
+                }
+                if (callResNdx) {
+                    document.getElementById('call-res-nq').textContent = convertLevel(callResNdx);
+                }
+                if (putSupNdx) {
+                    document.getElementById('put-sup-nq').textContent = convertLevel(putSupNdx);
+                }
+                
+                // Get GEX levels
+                const gexLevelsText = document.getElementById('gex-levels-ndx').value;
+                const gexLevelsNdx = gexLevelsText.split('\n')
+                    .filter(line => line.trim())
+                    .map(line => parseFloat(line.trim()))
+                    .filter(val => !isNaN(val));
+                
+                // Generate output
+                const now = new Date();
+                currentOutput = `$NQ1! LEVELS - ${now.toLocaleDateString('ru-RU')} ${now.toLocaleTimeString('ru-RU')}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Source: NDX MenthorQ Levels
+Conversion: × ${coefficient.toFixed(5)}
+NDX Price: ${document.getElementById('ndx-price').value}
+NQ Price: ${document.getElementById('nq-price').value}
+
+🔴 Call Resistance: ${convertLevel(callResNdx)}
+🟡 HVL (Zero Gamma): ${convertLevel(hvlNdx)}
+🟢 Put Support: ${convertLevel(putSupNdx)}
+
+`;
+                
+                if (gexLevelsNdx.length > 0) {
+                    currentOutput += `🎯 GEX LEVELS (магниты):\n`;
+                    gexLevelsNdx.forEach((level, index) => {
+                        const nqLevel = convertLevel(level);
+                        currentOutput += `   ${nqLevel} (NDX ${level})`;
+                        if (index === 0) currentOutput += ' ⚡ STRONGEST';
+                        currentOutput += '\n';
+                    });
+                }
+                
+                currentOutput += `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Generated: ${now.toLocaleString('ru-RU')}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+                
+                document.getElementById('output-box').textContent = currentOutput;
+                document.getElementById('output-box').style.display = 'block';
+                document.getElementById('action-buttons').style.display = 'flex';
+                
+                showAlert('✅ Конвертация выполнена успешно!', 'success');
+                
+            } catch (error) {
+                showAlert('❌ Ошибка конвертации! Проверь введенные данные.', 'error');
+            }
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard() {
+            navigator.clipboard.writeText(currentOutput).then(() => {
+                showAlert('✅ Скопировано в буфер обмена!', 'success');
+            });
+        }
+        
+        // Download as TXT
+        function downloadTxt() {
+            const blob = new Blob([currentOutput], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nq_levels_${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showAlert('✅ Файл загружен!', 'success');
+        }
+        
+        // Save to history
+        function saveToHistory() {
+            const history = JSON.parse(localStorage.getItem('nqConverterHistory') || '[]');
+            history.unshift({
+                timestamp: Date.now(),
+                output: currentOutput,
+                coefficient: coefficient
+            });
+            // Keep only last 20 items
+            if (history.length > 20) history.pop();
+            localStorage.setItem('nqConverterHistory', JSON.stringify(history));
+            
+            showAlert('✅ Сохранено в историю!', 'success');
+        }
+        
+        // Load history
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('nqConverterHistory') || '[]');
+            const historyList = document.getElementById('history-list');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = `
+                    <p style="text-align: center; color: #666; padding: 40px;">
+                        <i class="fas fa-inbox" style="font-size: 3em; display: block; margin-bottom: 10px; opacity: 0.3;"></i>
+                        История пуста. Сохрани свою первую конвертацию!
+                    </p>
+                `;
+                return;
+            }
+            
+            historyList.innerHTML = history.map((item, index) => {
+                const date = new Date(item.timestamp);
+                return `
+                    <div class="history-item">
+                        <div class="history-time">
+                            <i class="fas fa-clock"></i> ${date.toLocaleString('ru-RU')}
+                        </div>
+                        <pre style="font-size: 0.85em; overflow-x: auto;">${item.output}</pre>
+                        <div style="margin-top: 10px; display: flex; gap: 10px;">
+                            <button style="padding: 8px 15px; font-size: 0.9em;" onclick="copyHistoryItem(${index})">
+                                <i class="fas fa-copy"></i> Копировать
+                            </button>
+                            <button class="btn-warning" style="padding: 8px 15px; font-size: 0.9em;" onclick="deleteHistoryItem(${index})">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Copy history item
+        function copyHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem('nqConverterHistory') || '[]');
+            navigator.clipboard.writeText(history[index].output).then(() => {
+                showAlert('✅ Скопировано из истории!', 'success');
+            });
+        }
+        
+        // Delete history item
+        function deleteHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem('nqConverterHistory') || '[]');
+            history.splice(index, 1);
+            localStorage.setItem('nqConverterHistory', JSON.stringify(history));
+            loadHistory();
+            showAlert('✅ Запись удалена!', 'success');
+        }
+        
+        // Clear history
+        function clearHistory() {
+            if (confirm('Удалить всю историю?')) {
+                localStorage.removeItem('nqConverterHistory');
+                loadHistory();
+                showAlert('✅ История очищена!', 'success');
+            }
+        }
+        
+        // Reset form
+        function resetForm() {
+            document.getElementById('hvl-ndx').value = '25140';
+            document.getElementById('call-res-ndx').value = '25250';
+            document.getElementById('put-sup-ndx').value = '24000';
+            document.getElementById('gex-levels-ndx').value = '';
+            document.getElementById('hvl-nq').textContent = '—';
+            document.getElementById('call-res-nq').textContent = '—';
+            document.getElementById('put-sup-nq').textContent = '—';
+            document.getElementById('output-box').style.display = 'none';
+            document.getElementById('action-buttons').style.display = 'none';
+        }
+        
+        // Show alert
+        function showAlert(message, type) {
+            const alert = document.getElementById('success-alert');
+            const messageEl = document.getElementById('success-message');
+            
+            messageEl.textContent = message;
+            alert.className = type === 'error' ? 'alert alert-info' : 'alert alert-success';
+            alert.style.display = 'flex';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Auto-calculate on load
+        calculateCoefficient();
+    </script>
+</body>
+</html>
